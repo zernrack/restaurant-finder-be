@@ -76,7 +76,7 @@ export async function searchRestaurants(
   const places = await searchPlaces(params);
 
   const details = await Promise.all(
-    places.slice(0, 5).map((place) => getPlaceDetails(place.fsq_place_id)),
+    places.slice(0, 10).map((place) => getPlaceDetails(place.fsq_place_id)),
   );
 
   return details.map(mapPlaceToRestaurant);
