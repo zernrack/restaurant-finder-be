@@ -94,6 +94,7 @@ Example:
 PORT=3000
 FOURSQUARE_API_KEY=your_foursquare_api_key
 GEMINI_API_KEY=your_gemini_api_key
+BASE_URL=foursquare_base_url
 ```
 
 Notes:
