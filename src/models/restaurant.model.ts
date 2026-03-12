@@ -2,9 +2,10 @@ export interface Restaurant {
   id: string
   name: string
   address?: string
+  category?: string
   rating?: number
-  price?: number
-  categories?: string[]
+  priceLevel?: number
+  openNow?: boolean
+  hours?: string[]
   website?: string
-  phone?: string
 }
