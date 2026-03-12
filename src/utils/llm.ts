@@ -5,9 +5,9 @@ export async function askLlm(prompt: string): Promise<string> {
     const genAi = new GoogleGenAI({ apiKey: getGeminiApiKey() });
 
     const result = await genAi.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.5-flash-lite",
         contents: prompt
     })
 
-    return result.text ?? " "
+    return result.text ?? ''
 }
