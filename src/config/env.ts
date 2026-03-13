@@ -11,11 +11,11 @@ function getRequiredEnv(name: string): string {
 }
 
 export function getPort(): number {
-  return Number(process.env.PORT ?? 3000);
+  return Number(process.env.PORT ?? 3001);
 }
 
-export function getGeminiApiKey(): string {
-  return getRequiredEnv("GEMINI_API_KEY");
+export function getGroqApiKey(): string {
+  return getRequiredEnv("GROQ_API_KEY")
 }
 
 export function getFoursquareApiKey(): string {

@@ -24,7 +24,7 @@ Libraries
 External APIs
 
 * Foursquare Places API — restaurant search
-* Google Gemini API — natural language query interpretation
+* Groq API — natural language query interpretation (LLM inference)
 
 ---
 
@@ -91,9 +91,9 @@ Create a `.env` file in the project root.
 Example:
 
 ```env
-PORT=3000
+PORT=3001
 FOURSQUARE_API_KEY=your_foursquare_api_key
-GEMINI_API_KEY=your_gemini_api_key
+GROQ_API_KEY=your_groq_api_key
 BASE_URL=foursquare_base_url
 ```
 
@@ -116,8 +116,60 @@ npm run dev
 The server runs at:
 
 ```
-http://localhost:3000
+http://localhost:3001
 ```
+
+### LLM Provider Update (Gemini → Groq)
+
+The backend now uses **Groq** instead of Gemini for query interpretation.
+
+### Model Rotation (Implemented)
+
+To improve reliability under rate limits and provider-side transient failures, the backend now rotates across multiple Groq models in sequence.
+
+Current fallback order:
+
+1. `llama-3.1-8b-instant`
+2. `llama-3.3-70b-versatile`
+3. `moonshotai/kimi-k2-instruct-0905`
+
+If one model fails (for example due to rate limiting), the request automatically retries on the next model until one succeeds or all models fail.
+
+Reason for the change:
+
+* better support for larger-model capability in this use case
+* fewer interruptions caused by Gemini rate limit constraints during development/testing
+* more consistent response latency for prompt-to-JSON interpretation
+
+---
+
+# Unit Tests
+
+What is tested:
+
+* `interpreter.service.ts` parsing and validation behavior
+* `foursquare.service.ts` mapping logic and handling of optional fields
+* Service behavior is tested with mocked dependencies so no real external API calls are made
+
+How to run the tests:
+
+```bash
+npm test
+```
+
+Watch mode:
+
+```bash
+npm run test:watch
+```
+
+What is intentionally not tested:
+
+* Real integration calls to Groq or Foursquare APIs
+* Express route/controller integration behavior
+* End-to-end API testing through the `/api/execute` endpoint
+
+Those areas were left out on purpose to keep the current test suite fast, deterministic, and focused on unit-level business logic.
 
 ---
 
@@ -139,7 +191,7 @@ Query parameters:
 Example request:
 
 ```
-http://localhost:3000/api/execute?message=cheap sushi in los angeles open now&code=pioneerdevai
+http://localhost:3001/api/execute?message=cheap sushi in los angeles open now&code=pioneerdevai
 ```
 
 ---
@@ -195,7 +247,7 @@ GET
 URL
 
 ```
-http://localhost:3000/api/execute
+http://localhost:3001/api/execute
 ```
 
 Params
@@ -210,7 +262,7 @@ code = pioneerdevai
 ## Using curl
 
 ```bash
-curl "http://localhost:3000/api/execute?message=sushi%20in%20los%20angeles&code=pioneerdevai"
+curl "http://localhost:3001/api/execute?message=sushi%20in%20los%20angeles&code=pioneerdevai"
 ```
 
 ---
