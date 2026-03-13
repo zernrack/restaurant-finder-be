@@ -4,28 +4,28 @@ import { searchRestaurants } from "../services/foursquare.service.js";
 
 export async function executeController(req: Request, res: Response) {
   try {
-    const message = req.query.message as string | undefined;
+    const message = req.query.message;
 
-    if (!message) {
+    if (typeof message !== "string" || message.trim().length === 0) {
       return res.status(400).json({
-        error: "message query parameter required",
+        error: "Query parameter 'message' is required",
       });
     }
 
-    const params = await interpretMessage(message);
+    const interpretedParams = await interpretMessage(message);
 
-    const restaurants = await searchRestaurants(params);
+    const restaurants = await searchRestaurants(interpretedParams);
 
-    return res.json({
+    return res.status(200).json({
       query: message,
-      interpreted_params: params,
+      interpreted_params: interpretedParams,
       results: restaurants,
     });
   } catch (error) {
     console.error("Execute controller error:", error);
 
     return res.status(500).json({
-      error: "Internal server error",
+      error: "Failed to execute restaurant search",
     });
   }
 }

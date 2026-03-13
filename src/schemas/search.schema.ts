@@ -2,9 +2,8 @@ import { z } from "zod";
 
 export const SearchParamsSchema = z.object({
   query: z.string(),
-  near: z.string().optional(),
+  location: z.string().optional(),
   price: z.number().optional(),
-  open_now: z.boolean().optional(),
+  open_now: z.boolean().optional().nullable(),
 });
-
 export type SearchParams = z.infer<typeof SearchParamsSchema>;

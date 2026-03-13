@@ -14,7 +14,7 @@ async function searchPlaces(
   const response = await foursquareClient.get("/search", {
     params: {
       query: params.query,
-      near: params.near,
+      near: params.location,
       price: params.price,
       open_now: params.open_now,
       limit: 10,
@@ -34,9 +34,13 @@ async function getPlaceDetails(fsqId: string): Promise<FoursquarePlaceDetails> {
 /* Map response → restaurant */
 function mapPlaceToRestaurant(place: FoursquarePlaceDetails): Restaurant {
   const category = place.categories?.[0]?.name;
+  const id =
+    place.id ??
+    (place as unknown as { fsq_id?: string; fsq_place_id?: string }).fsq_id ??
+    (place as unknown as { fsq_id?: string; fsq_place_id?: string }).fsq_place_id;
 
   return {
-    id: place.id,
+    id: typeof id === "string" ? id : "",
     name: place.name,
 
     ...(place.location?.formatted_address && {
@@ -47,20 +51,20 @@ function mapPlaceToRestaurant(place: FoursquarePlaceDetails): Restaurant {
       category,
     }),
 
-    ...(place.rating !== undefined && {
+    ...(typeof place.rating === "number" && {
       rating: place.rating,
     }),
 
-    ...(place.price !== undefined && {
+    ...(typeof place.price === "number" && {
       priceLevel: place.price,
     }),
 
-    ...(place.hours?.open_now !== undefined && {
+    ...(typeof place.hours?.open_now === "boolean" && {
       openNow: place.hours.open_now,
     }),
 
-    ...(place.hours?.display && {
-      hours: place.hours.display,
+    ...(Array.isArray(place.hours?.display) && {
+      hours: place.hours.display.filter((item): item is string => typeof item === "string"),
     }),
 
     ...(place.website && {
@@ -79,5 +83,7 @@ export async function searchRestaurants(
     places.slice(0, 10).map((place) => getPlaceDetails(place.fsq_place_id)),
   );
 
-  return details.map(mapPlaceToRestaurant);
+  return details
+    .map(mapPlaceToRestaurant)
+    .filter((restaurant) => restaurant.id.length > 0 && restaurant.name.length > 0);
 }

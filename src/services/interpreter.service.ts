@@ -2,26 +2,26 @@ import { askLlm } from "../utils/llm.js";
 import { SearchParamsSchema} from "../schemas/search.schema.js";
 
 export async function interpretMessage(message: string) {
-  const prompt = `
-Convert this restaurant request into structured parameters.
+const prompt = `
+Extract restaurant search parameters from this query.
 
-Return JSON ONLY.
+User query:
+"${message}"
 
-Schema:
+Return ONLY JSON in this format:
+
 {
-  "query": string,
-  "near": string,
-  "price": number,
-  "open_now": boolean
+  "query": "restaurant type or cuisine",
+  "location": "city if mentioned",
+  "price": 1 | 2 | 3 | 4,
+  "open_now": true | false | null
 }
 
-price guide:
-1 = cheap
-2 = moderate
-3 = expensive
-
-User request:
-${message}
+Rules:
+- query = cuisine or food type
+- location = city if mentioned
+- price = 1 cheap, 2 moderate, 3 expensive, 4 luxury
+- open_now = true only if user mentions "open now"
 `;
 
   const raw = await askLlm(prompt);
