@@ -15,17 +15,19 @@ describe("interpretMessage", () => {
     mockAskLlm.mockResolvedValue(
       JSON.stringify({
         query: "sushi",
-        near: "Los Angeles",
+        location: "Los Angeles",
         price: 1,
         open_now: true,
       }),
     );
 
-    const result = await interpretMessage("cheap sushi in Los Angeles open now");
+    const result = await interpretMessage(
+      "cheap sushi in Los Angeles open now",
+    );
 
     expect(result).toEqual({
       query: "sushi",
-      near: "Los Angeles",
+      location: "Los Angeles",
       price: 1,
       open_now: true,
     });
@@ -37,7 +39,23 @@ describe("interpretMessage", () => {
     const result = await interpretMessage("pizza");
 
     expect(result.query).toBe("pizza");
-    expect(result.near).toBeUndefined();
+    expect(result.location).toBeUndefined();
+    expect(result.price).toBeUndefined();
+    expect(result.open_now).toBeUndefined();
+  });
+
+  it("normalizes nullable LLM fields to undefined", async () => {
+    mockAskLlm.mockResolvedValue(
+      JSON.stringify({
+        query: "burgers",
+        price: null,
+        open_now: null,
+      }),
+    );
+
+    const result = await interpretMessage("burgers nearby");
+
+    expect(result.query).toBe("burgers");
     expect(result.price).toBeUndefined();
     expect(result.open_now).toBeUndefined();
   });

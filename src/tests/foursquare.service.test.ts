@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { searchRestaurants } from "../services/foursquare.service.js";
-import type { FoursquarePlaceDetails, FoursquareSearchResult } from "../models/foursquare.model.js";
+import type {
+  FoursquarePlaceDetails,
+  FoursquareSearchResult,
+} from "../models/foursquare.model.js";
 
 const { mockGet } = vi.hoisted(() => ({ mockGet: vi.fn() }));
 
@@ -36,7 +39,7 @@ describe("searchRestaurants", () => {
 
     const results = await searchRestaurants({
       query: "sushi",
-      near: "Los Angeles",
+      location: "Los Angeles",
       price: 1,
       open_now: true,
     });
@@ -58,7 +61,7 @@ describe("searchRestaurants", () => {
   it("returns empty array when no places found", async () => {
     mockGet.mockResolvedValueOnce({ data: { results: [] } });
 
-    const results = await searchRestaurants({ query: "ramen" });
+    const results = await searchRestaurants({ query: "ramen", open_now: undefined });
 
     expect(results).toEqual([]);
   });
@@ -67,10 +70,12 @@ describe("searchRestaurants", () => {
     const minimalDetails: FoursquarePlaceDetails = { id: "xyz", name: "Cafe" };
 
     mockGet
-      .mockResolvedValueOnce({ data: { results: [{ fsq_place_id: "xyz", name: "Cafe" }] } })
+      .mockResolvedValueOnce({
+        data: { results: [{ fsq_place_id: "xyz", name: "Cafe" }] },
+      })
       .mockResolvedValueOnce({ data: minimalDetails });
 
-    const results = await searchRestaurants({ query: "cafe" });
+    const results = await searchRestaurants({ query: "cafe", open_now: undefined });
 
     expect(results[0]).toMatchObject({ id: "xyz", name: "Cafe" });
     expect(results[0]?.rating).toBeUndefined();
